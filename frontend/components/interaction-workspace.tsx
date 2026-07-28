@@ -69,6 +69,7 @@ export function InteractionWorkspace() {
   const [reviewResult, setReviewResult] = useState<ReviewSignOffResponse | null>(null);
   const [reviewNote, setReviewNote] = useState('');
   const [auditTrail, setAuditTrail] = useState<AuditEntry[]>([]);
+  const [isAuditVisible, setIsAuditVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -629,24 +630,42 @@ export function InteractionWorkspace() {
               <p className="panel-label">Audit trail</p>
               <h2>Review activity log</h2>
             </div>
+            <button
+              className="secondary-button compact"
+              type="button"
+              onClick={() => setIsAuditVisible((current) => !current)}
+              aria-expanded={isAuditVisible}
+              aria-controls="audit-log-content"
+            >
+              {isAuditVisible ? 'Hide log' : 'Show log'}
+            </button>
           </div>
 
-          {auditTrail.length ? (
-            <ol className="audit-list">
-              {auditTrail.map((entry) => (
-                <li key={entry.id} className="audit-item">
-                  <div className="audit-item-top">
-                    <strong>{entry.action}</strong>
-                    <span>{new Date(entry.timestamp).toLocaleString()}</span>
-                  </div>
-                  <p>{entry.detail}</p>
-                </li>
-              ))}
-            </ol>
+          {isAuditVisible ? (
+            <div id="audit-log-content">
+              {auditTrail.length ? (
+                <ol className="audit-list">
+                  {auditTrail.map((entry) => (
+                    <li key={entry.id} className="audit-item">
+                      <div className="audit-item-top">
+                        <strong>{entry.action}</strong>
+                        <span>{new Date(entry.timestamp).toLocaleString()}</span>
+                      </div>
+                      <p>{entry.detail}</p>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <div className="table-empty-state">
+                  <strong>No audit entries yet</strong>
+                  <p>Run an interaction check or submit a sign-off to populate the activity log.</p>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="table-empty-state">
-              <strong>No audit entries yet</strong>
-              <p>Run an interaction check or submit a sign-off to populate the activity log.</p>
+              <strong>Audit log hidden</strong>
+              <p>Click Show log to view review activity entries.</p>
             </div>
           )}
         </div>
