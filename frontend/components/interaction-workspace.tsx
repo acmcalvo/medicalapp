@@ -36,6 +36,14 @@ const evidenceBullets = [
   'Keep the AI summary constrained to citations and review-ready advice.',
 ];
 
+const supportedFallbackPairs = [
+  'Warfarin + Ibuprofen (including Advil, Motrin)',
+  'Warfarin + Ginkgo Biloba',
+  'Warfarin + Aspirin',
+  'Simvastatin + Clarithromycin (including Biaxin)',
+  'Sildenafil (Viagra) + Nitroglycerin/Isosorbide',
+];
+
 const severityLabelMap: Record<string, string> = {
   contraindicated: 'Contraindicated',
   major: 'Major',
@@ -392,6 +400,16 @@ export function InteractionWorkspace() {
         <div className="note-card">
           <strong>Next step</strong>
           <p>Send this structured payload to the backend before any AI-generated advice is shown.</p>
+        </div>
+
+        <div className="note-card supported-pairs-card">
+          <strong>Supported high-risk fallback pairs</strong>
+          <p>These combinations are currently covered by explicit fallback rules if live interaction data is unavailable.</p>
+          <ul>
+            {supportedFallbackPairs.map((pair) => (
+              <li key={pair}>{pair}</li>
+            ))}
+          </ul>
         </div>
       </section>
 

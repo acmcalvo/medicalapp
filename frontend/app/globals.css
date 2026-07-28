@@ -292,6 +292,13 @@ select {
   line-height: 1.6;
 }
 
+.supported-pairs-card ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .results-panel {
   display: grid;
   gap: 16px;
