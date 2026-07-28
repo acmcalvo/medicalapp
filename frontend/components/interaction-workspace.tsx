@@ -722,8 +722,9 @@ export function InteractionWorkspace() {
               onClick={() => setIsAuditVisible((current) => !current)}
               aria-expanded={isAuditVisible}
               aria-controls="audit-log-content"
+              aria-label={isAuditVisible ? 'Collapse audit log' : 'Expand audit log'}
             >
-              {isAuditVisible ? 'Hide log' : 'Show log'}
+              {isAuditVisible ? '▲ Hide log' : '▼ Show log'}
             </button>
           </div>
 
