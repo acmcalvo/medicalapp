@@ -43,3 +43,17 @@ Stop containers:
 ```bash
 docker compose down
 ```
+
+## Optional External Interaction Provider
+
+The backend can use an external interaction API and fall back to built-in high-risk rules when unavailable.
+
+Set these backend environment variables:
+
+- `INTERACTION_PROVIDER=auto` (default), `external`, or `rxnav`
+- `INTERACTIONS_API_URL` (full HTTPS endpoint)
+- `INTERACTIONS_API_KEY` (optional)
+- `INTERACTIONS_API_AUTH_HEADER` (optional, default: `Authorization`)
+- `INTERACTIONS_API_TIMEOUT_SEC` (optional, default: `10`)
+
+When external provider is configured and returns results, UI source labels show `External API`.

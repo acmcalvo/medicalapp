@@ -25,7 +25,7 @@ class InteractionItem(BaseModel):
     drug_a: str
     drug_b: str
     severity: Severity
-    source_type: Literal["live_rxcui", "heuristic"]
+    source_type: Literal["live_rxcui", "external_api", "heuristic"]
     mechanism: str
     clinical_effect: str
     recommendation: str

@@ -44,6 +44,18 @@ const supportedFallbackPairs = [
   'Sildenafil (Viagra) + Nitroglycerin/Isosorbide',
 ];
 
+const sourceTypeLabelMap: Record<'live_rxcui' | 'external_api' | 'heuristic', string> = {
+  live_rxcui: 'Live RxNorm',
+  external_api: 'External API',
+  heuristic: 'Fallback heuristic',
+};
+
+const sourceTypeClassMap: Record<'live_rxcui' | 'external_api' | 'heuristic', string> = {
+  live_rxcui: 'source-pill source-live',
+  external_api: 'source-pill source-external',
+  heuristic: 'source-pill source-heuristic',
+};
+
 const severityLabelMap: Record<string, string> = {
   contraindicated: 'Contraindicated',
   major: 'Major',
@@ -262,9 +274,7 @@ export function InteractionWorkspace() {
       setReviewResult(null);
       const evidenceModes = Array.from(
         new Set(
-          interactionResponse.interactions.map((interaction) =>
-            interaction.source_type === 'live_rxcui' ? 'live RxNorm' : 'fallback heuristic',
-          ),
+          interactionResponse.interactions.map((interaction) => sourceTypeLabelMap[interaction.source_type]),
         ),
       );
       appendAuditEntry(
@@ -577,11 +587,9 @@ export function InteractionWorkspace() {
                 </div>
                 <div>
                   <div
-                    className={
-                      interaction.source_type === 'live_rxcui' ? 'source-pill source-live' : 'source-pill source-heuristic'
-                    }
+                    className={sourceTypeClassMap[interaction.source_type]}
                   >
-                    {interaction.source_type === 'live_rxcui' ? 'Live RxNorm' : 'Fallback heuristic'}
+                    {sourceTypeLabelMap[interaction.source_type]}
                   </div>
                   <div className="table-secondary">{interaction.source}</div>
                 </div>

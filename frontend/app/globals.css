@@ -421,6 +421,11 @@ select {
   background: rgba(49, 196, 141, 0.18);
 }
 
+.source-external {
+  color: #1b3f7a;
+  background: rgba(59, 130, 246, 0.16);
+}
+
 .source-heuristic {
   color: #6a4100;
   background: rgba(245, 158, 11, 0.18);

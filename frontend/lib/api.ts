@@ -19,7 +19,7 @@ export type InteractionItem = {
   drug_a: string;
   drug_b: string;
   severity: Severity;
-  source_type: 'live_rxcui' | 'heuristic';
+  source_type: 'live_rxcui' | 'external_api' | 'heuristic';
   mechanism: string;
   clinical_effect: string;
   recommendation: string;
