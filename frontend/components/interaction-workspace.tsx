@@ -40,8 +40,12 @@ const supportedFallbackPairs = [
   'Warfarin + Ibuprofen (including Advil, Motrin)',
   'Warfarin + Ginkgo Biloba',
   'Warfarin + Aspirin',
+  'Warfarin + Alcohol',
   'Simvastatin + Clarithromycin (including Biaxin)',
   'Sildenafil (Viagra) + Nitroglycerin/Isosorbide',
+  'Linezolid + Sertraline',
+  'Digoxin + Amiodarone',
+  'Lisinopril + Potassium supplements',
 ];
 
 const sourceTypeLabelMap: Record<'live_rxcui' | 'external_api' | 'heuristic', string> = {
@@ -68,6 +72,10 @@ const knownHighRiskPairKeywords: Array<[string[], string[]]> = [
   [['warfarin'], ['ibuprofen', 'advil', 'motrin']],
   [['warfarin'], ['ginkgo', 'ginko']],
   [['warfarin'], ['aspirin', 'acetylsalicylic']],
+  [['warfarin'], ['alcohol', 'ethanol', 'beer', 'wine', 'whiskey', 'vodka']],
+  [['linezolid'], ['sertraline', 'zoloft', 'ssri']],
+  [['digoxin'], ['amiodarone']],
+  [['lisinopril', 'ace inhibitor'], ['potassium', 'kcl', 'potassium chloride']],
   [['simvastatin'], ['clarithromycin', 'biaxin']],
   [['sildenafil', 'viagra'], ['nitroglycerin', 'isosorbide']],
 ];

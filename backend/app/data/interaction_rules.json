@@ -1,0 +1,156 @@
+[
+  {
+    "drug_a": "Warfarin",
+    "drug_b": "Ibuprofen",
+    "keywords_a": ["warfarin"],
+    "keywords_b": ["ibuprofen", "advil", "motrin"],
+    "severity": "major",
+    "mechanism": "Combined anticoagulant and NSAID effects increase bleeding risk.",
+    "clinical_effect": "Higher likelihood of gastrointestinal or systemic bleeding.",
+    "recommendation": "Review necessity, consider alternatives, and monitor for bleeding signs.",
+    "monitoring": ["Monitor for bruising", "Check stool for blood", "Review INR if applicable"]
+  },
+  {
+    "drug_a": "Warfarin",
+    "drug_b": "Ginkgo Biloba",
+    "keywords_a": ["warfarin"],
+    "keywords_b": ["ginkgo", "ginko"],
+    "severity": "major",
+    "mechanism": "Concurrent anticoagulant and antiplatelet effects may increase bleeding risk.",
+    "clinical_effect": "Higher likelihood of bruising, mucosal bleeding, or serious hemorrhage.",
+    "recommendation": "Avoid or closely monitor this combination and document clinical rationale.",
+    "monitoring": ["Monitor for bruising", "Check for bleeding symptoms", "Review INR if applicable"]
+  },
+  {
+    "drug_a": "Warfarin",
+    "drug_b": "Aspirin",
+    "keywords_a": ["warfarin"],
+    "keywords_b": ["aspirin", "acetylsalicylic"],
+    "severity": "major",
+    "mechanism": "Dual anticoagulant and antiplatelet effects increase bleeding potential.",
+    "clinical_effect": "Elevated risk of major bleeding events.",
+    "recommendation": "Use only with clear indication and close monitoring.",
+    "monitoring": ["Monitor for bleeding", "Review INR trend", "Review GI risk"]
+  },
+  {
+    "drug_a": "Warfarin",
+    "drug_b": "Alcohol",
+    "keywords_a": ["warfarin"],
+    "keywords_b": ["alcohol", "ethanol", "beer", "wine", "whiskey", "vodka"],
+    "severity": "major",
+    "mechanism": "Alcohol intake can alter warfarin metabolism and increase anticoagulant effect variability.",
+    "clinical_effect": "Increased risk of elevated INR and bleeding, especially with heavy or irregular alcohol use.",
+    "recommendation": "Avoid heavy alcohol use and monitor INR and bleeding risk closely when alcohol exposure is present.",
+    "monitoring": ["Monitor INR trend", "Assess for bleeding symptoms", "Counsel on alcohol intake consistency"]
+  },
+  {
+    "drug_a": "Simvastatin",
+    "drug_b": "Clarithromycin",
+    "keywords_a": ["simvastatin"],
+    "keywords_b": ["clarithromycin", "biaxin"],
+    "severity": "major",
+    "mechanism": "CYP3A4 inhibition can increase simvastatin concentration.",
+    "clinical_effect": "Increased risk of myopathy or rhabdomyolysis.",
+    "recommendation": "Avoid co-administration or hold simvastatin while clarithromycin is used.",
+    "monitoring": ["Monitor for muscle pain", "Check CK if symptomatic"]
+  },
+  {
+    "drug_a": "Sildenafil",
+    "drug_b": "Nitroglycerin",
+    "keywords_a": ["sildenafil", "viagra"],
+    "keywords_b": ["nitroglycerin", "isosorbide"],
+    "severity": "contraindicated",
+    "mechanism": "Additive vasodilatory effects can cause profound hypotension.",
+    "clinical_effect": "Risk of severe hypotension, syncope, or ischemic events.",
+    "recommendation": "Do not co-administer; this combination is contraindicated.",
+    "monitoring": ["Urgent clinical review required"]
+  },
+  {
+    "drug_a": "Linezolid",
+    "drug_b": "Sertraline",
+    "keywords_a": ["linezolid"],
+    "keywords_b": ["sertraline", "zoloft", "ssri"],
+    "severity": "contraindicated",
+    "mechanism": "MAOI activity plus serotonergic exposure can precipitate serotonin syndrome.",
+    "clinical_effect": "Risk of severe serotonin toxicity including autonomic instability and neuromuscular findings.",
+    "recommendation": "Avoid combination or use specialist-supervised washout strategy.",
+    "monitoring": ["Urgent psychiatric and medical review"]
+  },
+  {
+    "drug_a": "Digoxin",
+    "drug_b": "Amiodarone",
+    "keywords_a": ["digoxin"],
+    "keywords_b": ["amiodarone"],
+    "severity": "major",
+    "mechanism": "Amiodarone may increase digoxin concentrations through transport and clearance effects.",
+    "clinical_effect": "Higher risk of digoxin toxicity and bradyarrhythmias.",
+    "recommendation": "Consider dose adjustment and close therapeutic monitoring.",
+    "monitoring": ["Monitor heart rate", "Check digoxin level", "Monitor for GI and visual toxicity"]
+  },
+  {
+    "drug_a": "Lisinopril",
+    "drug_b": "Potassium Chloride",
+    "keywords_a": ["lisinopril", "ace inhibitor"],
+    "keywords_b": ["potassium", "kcl", "potassium chloride"],
+    "severity": "major",
+    "mechanism": "Additive potassium-retaining effects can lead to hyperkalemia.",
+    "clinical_effect": "Risk of clinically significant hyperkalemia and arrhythmia.",
+    "recommendation": "Use caution with frequent electrolyte monitoring and dose reassessment.",
+    "monitoring": ["Monitor potassium", "Monitor renal function", "Assess ECG changes if indicated"]
+  },
+  {
+    "drug_a": "Spironolactone",
+    "drug_b": "Potassium Chloride",
+    "keywords_a": ["spironolactone"],
+    "keywords_b": ["potassium", "kcl", "potassium chloride"],
+    "severity": "major",
+    "mechanism": "Potassium-sparing and potassium supplementation can cause additive hyperkalemia risk.",
+    "clinical_effect": "Risk of dangerous potassium elevation and rhythm disturbances.",
+    "recommendation": "Avoid routine combination unless strongly indicated and supervised.",
+    "monitoring": ["Monitor potassium", "Monitor renal function", "Monitor for weakness and palpitations"]
+  },
+  {
+    "drug_a": "Clopidogrel",
+    "drug_b": "Omeprazole",
+    "keywords_a": ["clopidogrel", "plavix"],
+    "keywords_b": ["omeprazole", "prilosec"],
+    "severity": "moderate",
+    "mechanism": "CYP2C19 inhibition may reduce activation of clopidogrel.",
+    "clinical_effect": "Potential reduction in antiplatelet effect.",
+    "recommendation": "Consider alternative acid suppression strategy when appropriate.",
+    "monitoring": ["Monitor for thrombotic symptoms", "Review GI strategy"]
+  },
+  {
+    "drug_a": "Metformin",
+    "drug_b": "Cimetidine",
+    "keywords_a": ["metformin"],
+    "keywords_b": ["cimetidine", "tagamet"],
+    "severity": "moderate",
+    "mechanism": "Reduced renal clearance may increase metformin exposure.",
+    "clinical_effect": "Potential increase in adverse effects including lactic acidosis risk factors.",
+    "recommendation": "Consider alternative H2 blocker or monitor closely.",
+    "monitoring": ["Monitor renal function", "Assess GI intolerance", "Review lactate risk factors"]
+  },
+  {
+    "drug_a": "Apixaban",
+    "drug_b": "Ketoconazole",
+    "keywords_a": ["apixaban", "eliquis"],
+    "keywords_b": ["ketoconazole"],
+    "severity": "major",
+    "mechanism": "Strong CYP3A4 and P-gp inhibition can increase apixaban exposure.",
+    "clinical_effect": "Increased bleeding risk.",
+    "recommendation": "Avoid combination or follow specialist anticoagulation guidance.",
+    "monitoring": ["Monitor for bleeding", "Review anticoagulation strategy"]
+  },
+  {
+    "drug_a": "Tramadol",
+    "drug_b": "Sertraline",
+    "keywords_a": ["tramadol"],
+    "keywords_b": ["sertraline", "zoloft", "ssri"],
+    "severity": "major",
+    "mechanism": "Combined serotonergic effects can increase serotonin syndrome risk.",
+    "clinical_effect": "Risk of agitation, autonomic instability, and neuromuscular symptoms.",
+    "recommendation": "Use caution and consider alternative analgesic if high risk.",
+    "monitoring": ["Monitor for serotonin syndrome", "Monitor CNS effects"]
+  }
+]

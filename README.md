@@ -57,3 +57,20 @@ Set these backend environment variables:
 - `INTERACTIONS_API_TIMEOUT_SEC` (optional, default: `10`)
 
 When external provider is configured and returns results, UI source labels show `External API`.
+
+## Bulk Fallback Interaction Rules (No API Key Required)
+
+You can maintain many interaction pairs at once through a JSON file instead of editing Python rules one by one.
+
+- Default file: `backend/app/data/interaction_rules.json`
+- Optional override: `HEURISTIC_RULES_FILE=/absolute/path/to/interaction_rules.json`
+
+Each rule must include:
+
+- `drug_a`, `drug_b`
+- `keywords_a`, `keywords_b` (arrays of match keywords)
+- `severity` (`contraindicated|major|moderate|minor|none`)
+- `mechanism`, `clinical_effect`, `recommendation`
+- `monitoring` (array of strings)
+
+This allows fast bulk updates by replacing or extending the JSON file.

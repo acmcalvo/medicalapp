@@ -1,4 +1,6 @@
+import json
 import os
+from pathlib import Path
 
 from app.schemas.clinical import InteractionCheckRequest, InteractionCheckResponse, InteractionItem
 
@@ -8,7 +10,7 @@ from app.services.openfda_client import get_safety_note
 from app.services.rxnav_client import get_rxnorm_name, lookup_interactions, lookup_rxcui, normalize_medication_name, summarize_drug_pair
 
 
-HEURISTIC_INTERACTION_RULES = [
+DEFAULT_HEURISTIC_INTERACTION_RULES = [
     {
         "drug_a": "Warfarin",
         "drug_b": "Ibuprofen",
@@ -43,6 +45,17 @@ HEURISTIC_INTERACTION_RULES = [
         "monitoring": ["Monitor for bleeding", "Review INR trend", "Review GI risk"],
     },
     {
+        "drug_a": "Warfarin",
+        "drug_b": "Alcohol",
+        "keywords_a": ["warfarin"],
+        "keywords_b": ["alcohol", "ethanol", "beer", "wine", "whiskey", "vodka"],
+        "severity": "major",
+        "mechanism": "Alcohol intake can alter warfarin metabolism and increase anticoagulant effect variability.",
+        "clinical_effect": "Increased risk of elevated INR and bleeding, especially with heavy or irregular alcohol use.",
+        "recommendation": "Avoid heavy alcohol use and monitor INR/bleeding risk closely when alcohol exposure is present.",
+        "monitoring": ["Monitor INR trend", "Assess for bleeding symptoms", "Counsel on alcohol intake consistency"],
+    },
+    {
         "drug_a": "Simvastatin",
         "drug_b": "Clarithromycin",
         "keywords_a": ["simvastatin"],
@@ -65,6 +78,53 @@ HEURISTIC_INTERACTION_RULES = [
         "monitoring": ["Urgent clinical review required"],
     },
 ]
+
+
+def _load_heuristic_rules() -> list[dict]:
+    default_rules = DEFAULT_HEURISTIC_INTERACTION_RULES
+    default_path = Path(__file__).resolve().parent.parent / "data" / "interaction_rules.json"
+    configured_path = os.getenv("HEURISTIC_RULES_FILE", "").strip()
+    rules_path = Path(configured_path) if configured_path else default_path
+
+    try:
+        payload = json.loads(rules_path.read_text(encoding="utf-8"))
+    except Exception:
+        return default_rules
+
+    if not isinstance(payload, list):
+        return default_rules
+
+    required_fields = {
+        "drug_a",
+        "drug_b",
+        "keywords_a",
+        "keywords_b",
+        "severity",
+        "mechanism",
+        "clinical_effect",
+        "recommendation",
+        "monitoring",
+    }
+    valid_severity = {"contraindicated", "major", "moderate", "minor", "none"}
+
+    normalized_rules: list[dict] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        if not required_fields.issubset(item.keys()):
+            continue
+        if item.get("severity") not in valid_severity:
+            continue
+        if not isinstance(item.get("keywords_a"), list) or not isinstance(item.get("keywords_b"), list):
+            continue
+        if not isinstance(item.get("monitoring"), list):
+            continue
+        normalized_rules.append(item)
+
+    return normalized_rules or default_rules
+
+
+HEURISTIC_INTERACTION_RULES = _load_heuristic_rules()
 
 
 def _contains_keyword(names: set[str], keywords: list[str]) -> bool:
