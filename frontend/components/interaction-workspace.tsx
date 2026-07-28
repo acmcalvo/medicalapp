@@ -44,6 +44,18 @@ const severityLabelMap: Record<string, string> = {
   none: 'None',
 };
 
+const knownHighRiskPairKeywords: Array<[string[], string[]]> = [
+  [['warfarin'], ['ibuprofen', 'advil', 'motrin']],
+  [['warfarin'], ['ginkgo', 'ginko']],
+  [['warfarin'], ['aspirin', 'acetylsalicylic']],
+  [['simvastatin'], ['clarithromycin', 'biaxin']],
+  [['sildenafil', 'viagra'], ['nitroglycerin', 'isosorbide']],
+];
+
+function hasKeywordMatch(names: string[], keywords: string[]) {
+  return names.some((name) => keywords.some((keyword) => name.includes(keyword)));
+}
+
 const reviewStorageKey = 'medical-app-review-result';
 const auditTrailStorageKey = 'medical-app-audit-trail';
 const auditVisibilityStorageKey = 'medical-app-audit-visibility';
@@ -76,10 +88,11 @@ export function InteractionWorkspace() {
 
   const hasPotentialInteraction = useMemo(() => {
     const names = medications.map((medication) => medication.name.toLowerCase());
-    const hasWarfarin = names.some((name) => name.includes('warfarin'));
-    const hasIbuprofen = names.some((name) => name.includes('ibuprofen') || name.includes('advil') || name.includes('motrin'));
-    const hasGinkgo = names.some((name) => name.includes('ginkgo') || name.includes('ginko'));
-    return hasWarfarin && (hasIbuprofen || hasGinkgo);
+    return knownHighRiskPairKeywords.some(([keywordsA, keywordsB]) => {
+      const directMatch = hasKeywordMatch(names, keywordsA) && hasKeywordMatch(names, keywordsB);
+      const reverseMatch = hasKeywordMatch(names, keywordsB) && hasKeywordMatch(names, keywordsA);
+      return directMatch || reverseMatch;
+    });
   }, [medications]);
 
   const displayedInteractions = interactionResult?.interactions ?? [];

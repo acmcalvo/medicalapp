@@ -5,6 +5,69 @@ from app.services.openfda_client import get_safety_note
 from app.services.rxnav_client import get_rxnorm_name, lookup_interactions, lookup_rxcui, normalize_medication_name, summarize_drug_pair
 
 
+HEURISTIC_INTERACTION_RULES = [
+    {
+        "drug_a": "Warfarin",
+        "drug_b": "Ibuprofen",
+        "keywords_a": ["warfarin"],
+        "keywords_b": ["ibuprofen", "advil", "motrin"],
+        "severity": "major",
+        "mechanism": "Combined anticoagulant and NSAID effects increase bleeding risk.",
+        "clinical_effect": "Higher likelihood of gastrointestinal or systemic bleeding.",
+        "recommendation": "Review necessity, consider alternatives, and monitor for bleeding signs.",
+        "monitoring": ["Monitor for bruising", "Check stool for blood", "Review INR if applicable"],
+    },
+    {
+        "drug_a": "Warfarin",
+        "drug_b": "Ginkgo Biloba",
+        "keywords_a": ["warfarin"],
+        "keywords_b": ["ginkgo", "ginko"],
+        "severity": "major",
+        "mechanism": "Concurrent anticoagulant and antiplatelet effects may increase bleeding risk.",
+        "clinical_effect": "Higher likelihood of bruising, mucosal bleeding, or serious hemorrhage.",
+        "recommendation": "Avoid or closely monitor this combination and document clinical rationale.",
+        "monitoring": ["Monitor for bruising", "Check for bleeding symptoms", "Review INR if applicable"],
+    },
+    {
+        "drug_a": "Warfarin",
+        "drug_b": "Aspirin",
+        "keywords_a": ["warfarin"],
+        "keywords_b": ["aspirin", "acetylsalicylic"],
+        "severity": "major",
+        "mechanism": "Dual anticoagulant and antiplatelet effects increase bleeding potential.",
+        "clinical_effect": "Elevated risk of major bleeding events.",
+        "recommendation": "Use only with clear indication and close monitoring.",
+        "monitoring": ["Monitor for bleeding", "Review INR trend", "Review GI risk"],
+    },
+    {
+        "drug_a": "Simvastatin",
+        "drug_b": "Clarithromycin",
+        "keywords_a": ["simvastatin"],
+        "keywords_b": ["clarithromycin", "biaxin"],
+        "severity": "major",
+        "mechanism": "CYP3A4 inhibition can increase simvastatin concentration.",
+        "clinical_effect": "Increased risk of myopathy or rhabdomyolysis.",
+        "recommendation": "Avoid co-administration or hold simvastatin while clarithromycin is used.",
+        "monitoring": ["Monitor for muscle pain", "Check CK if symptomatic"],
+    },
+    {
+        "drug_a": "Sildenafil",
+        "drug_b": "Nitroglycerin",
+        "keywords_a": ["sildenafil", "viagra"],
+        "keywords_b": ["nitroglycerin", "isosorbide"],
+        "severity": "contraindicated",
+        "mechanism": "Additive vasodilatory effects can cause profound hypotension.",
+        "clinical_effect": "Risk of severe hypotension, syncope, or ischemic events.",
+        "recommendation": "Do not co-administer; this combination is contraindicated.",
+        "monitoring": ["Urgent clinical review required"],
+    },
+]
+
+
+def _contains_keyword(names: set[str], keywords: list[str]) -> bool:
+    return any(any(keyword in name for keyword in keywords) for name in names)
+
+
 def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResponse:
     cleaned_names = [
         medication.name_entered.strip()
@@ -50,45 +113,27 @@ def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResp
         pass
 
     normalized_names = {normalize_medication_name(medication) for medication in request.medications if medication.name_entered.strip()}
-    has_warfarin = any("warfarin" in name for name in normalized_names)
-    has_ibuprofen = any("ibuprofen" in name or "advil" in name or "motrin" in name for name in normalized_names)
-    has_ginkgo = any("ginkgo" in name or "ginko" in name for name in normalized_names)
 
-    if has_warfarin and has_ibuprofen:
-        pair = summarize_drug_pair("Warfarin", "Ibuprofen")
+    for rule in HEURISTIC_INTERACTION_RULES:
+        matches_direct = _contains_keyword(normalized_names, rule["keywords_a"]) and _contains_keyword(normalized_names, rule["keywords_b"])
+        matches_reverse = _contains_keyword(normalized_names, rule["keywords_b"]) and _contains_keyword(normalized_names, rule["keywords_a"])
+        if not (matches_direct or matches_reverse):
+            continue
+
+        pair = summarize_drug_pair(rule["drug_a"], rule["drug_b"])
         return InteractionCheckResponse(
-            max_severity="major",
+            max_severity=rule["severity"],
             interactions=[
                 InteractionItem(
                     drug_a=pair["drug_a"],
                     drug_b=pair["drug_b"],
-                    severity="major",
+                    severity=rule["severity"],
                     source_type="heuristic",
-                    mechanism="Combined anticoagulant and NSAID effects increase bleeding risk.",
-                    clinical_effect="Higher likelihood of gastrointestinal or systemic bleeding.",
-                    recommendation="Review necessity, consider alternatives, and monitor for bleeding signs.",
-                    monitoring=["Monitor for bruising", "Check stool for blood", "Review INR if applicable"],
-                    source=f"Fallback heuristic | {pair['source']} | {get_label_snippet('Warfarin')} | {get_safety_note('Ibuprofen')}",
-                )
-            ],
-            requires_clinician_review=True,
-        )
-
-    if has_warfarin and has_ginkgo:
-        pair = summarize_drug_pair("Warfarin", "Ginkgo Biloba")
-        return InteractionCheckResponse(
-            max_severity="major",
-            interactions=[
-                InteractionItem(
-                    drug_a=pair["drug_a"],
-                    drug_b=pair["drug_b"],
-                    severity="major",
-                    source_type="heuristic",
-                    mechanism="Concurrent anticoagulant and antiplatelet effects may increase bleeding risk.",
-                    clinical_effect="Higher likelihood of bruising, mucosal bleeding, or serious hemorrhage.",
-                    recommendation="Avoid or closely monitor this combination and document clinical rationale.",
-                    monitoring=["Monitor for bruising", "Check for bleeding symptoms", "Review INR if applicable"],
-                    source=f"Fallback heuristic | {pair['source']} | {get_label_snippet('Warfarin')} | {get_safety_note('Ginkgo Biloba')}",
+                    mechanism=rule["mechanism"],
+                    clinical_effect=rule["clinical_effect"],
+                    recommendation=rule["recommendation"],
+                    monitoring=rule["monitoring"],
+                    source=f"Fallback heuristic | {pair['source']} | {get_label_snippet(rule['drug_a'])} | {get_safety_note(rule['drug_b'])}",
                 )
             ],
             requires_clinician_review=True,
