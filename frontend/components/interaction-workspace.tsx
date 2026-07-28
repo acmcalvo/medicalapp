@@ -204,6 +204,21 @@ export function InteractionWorkspace() {
     setMedications((current) => [...current, { id: `med-${Date.now()}`, name: '', dose: '' }]);
   };
 
+  const removeMedication = (medicationId: string) => {
+    const medication = medications.find((item) => item.id === medicationId);
+    const label = medication?.name?.trim() || 'this medication row';
+    if (!window.confirm(`Delete ${label}?`)) {
+      return;
+    }
+
+    setMedications((current) => {
+      if (current.length <= 1) {
+        return current;
+      }
+      return current.filter((medication) => medication.id !== medicationId);
+    });
+  };
+
   const appendAuditEntry = (action: string, detail: string) => {
     const timestamp = new Date().toISOString();
     setAuditTrail((current) => [
@@ -393,6 +408,17 @@ export function InteractionWorkspace() {
                   onChange={(event) => updateMedication(index, 'dose', event.target.value)}
                 />
               </label>
+              <div className="medication-row-actions">
+                <button
+                  className="secondary-button compact danger-button"
+                  type="button"
+                  onClick={() => removeMedication(medication.id)}
+                  disabled={medications.length <= 1}
+                  title={medications.length <= 1 ? 'At least one medication row is required.' : `Remove ${medication.name || 'medication row'}`}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
