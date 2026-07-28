@@ -20,4 +20,4 @@ COPY --from=builder /app ./
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start", "--", "-p", "3000"]
+CMD ["sh", "-c", "npm run start -- -p ${PORT:-3000}"]
