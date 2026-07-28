@@ -76,7 +76,10 @@ export function InteractionWorkspace() {
 
   const hasPotentialInteraction = useMemo(() => {
     const names = medications.map((medication) => medication.name.toLowerCase());
-    return names.some((name) => name.includes('warfarin')) && names.some((name) => name.includes('ibuprofen'));
+    const hasWarfarin = names.some((name) => name.includes('warfarin'));
+    const hasIbuprofen = names.some((name) => name.includes('ibuprofen') || name.includes('advil') || name.includes('motrin'));
+    const hasGinkgo = names.some((name) => name.includes('ginkgo') || name.includes('ginko'));
+    return hasWarfarin && (hasIbuprofen || hasGinkgo);
   }, [medications]);
 
   const displayedInteractions = interactionResult?.interactions ?? [];
