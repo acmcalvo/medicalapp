@@ -58,6 +58,15 @@ Set these backend environment variables:
 
 When external provider is configured and returns results, UI source labels show `External API`.
 
+### RxLabelGuard Example
+
+Use these backend environment variables in Render:
+
+- `INTERACTION_PROVIDER=external`
+- `INTERACTIONS_API_URL=https://api.rxlabelguard.com/v1/interactions`
+- `INTERACTIONS_API_KEY=<your_rxlabelguard_key>`
+- `INTERACTIONS_API_AUTH_HEADER=Authorization`
+
 ## Bulk Fallback Interaction Rules (No API Key Required)
 
 You can maintain many interaction pairs at once through a JSON file instead of editing Python rules one by one.

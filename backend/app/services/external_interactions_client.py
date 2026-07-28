@@ -57,7 +57,11 @@ def lookup_external_interactions(medication_names: list[str]) -> list[dict[str, 
     if api_key:
         headers[auth_header] = f"Bearer {api_key}"
 
-    payload = {"medications": medication_names}
+    # Send both keys so common provider shapes work without custom code.
+    payload = {
+        "drugs": medication_names,
+        "medications": medication_names,
+    }
 
     try:
         response = httpx.post(api_url, headers=headers, json=payload, timeout=timeout)
@@ -68,6 +72,13 @@ def lookup_external_interactions(medication_names: list[str]) -> list[dict[str, 
 
     mapped_items: list[dict[str, Any]] = []
     for item in raw_items:
+        evidence = item.get("evidence") if isinstance(item.get("evidence"), dict) else {}
+        evidence_source = item.get("source") or evidence.get("source")
+        spl_set_id = evidence.get("spl_set_id")
+        source_text = _to_string(evidence_source, "External interaction provider")
+        if spl_set_id:
+            source_text = f"{source_text} (SPL Set ID: {spl_set_id})"
+
         drug_a = _to_string(
             item.get("drug_a")
             or item.get("drugA")
@@ -92,7 +103,7 @@ def lookup_external_interactions(medication_names: list[str]) -> list[dict[str, 
                 "clinical_effect": _to_string(item.get("clinical_effect") or item.get("clinicalEffect"), "Clinical significance requires review."),
                 "recommendation": _to_string(item.get("recommendation"), "Review with clinician before dispensing or prescribing."),
                 "monitoring": item.get("monitoring") if isinstance(item.get("monitoring"), list) else ["Monitor clinically as appropriate"],
-                "source": _to_string(item.get("source"), "External interaction provider"),
+                "source": source_text,
             }
         )
 
