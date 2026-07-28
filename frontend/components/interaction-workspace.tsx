@@ -46,6 +46,7 @@ const severityLabelMap: Record<string, string> = {
 
 const reviewStorageKey = 'medical-app-review-result';
 const auditTrailStorageKey = 'medical-app-audit-trail';
+const auditVisibilityStorageKey = 'medical-app-audit-visibility';
 
 type AuditEntry = {
   id: string;
@@ -104,6 +105,23 @@ export function InteractionWorkspace() {
       return;
     }
 
+    const storedAuditVisibility = window.localStorage.getItem(auditVisibilityStorageKey);
+    if (!storedAuditVisibility) {
+      return;
+    }
+
+    try {
+      setIsAuditVisible(JSON.parse(storedAuditVisibility) as boolean);
+    } catch {
+      window.localStorage.removeItem(auditVisibilityStorageKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const storedAuditTrail = window.localStorage.getItem(auditTrailStorageKey);
     if (!storedAuditTrail) {
       return;
@@ -141,6 +159,14 @@ export function InteractionWorkspace() {
 
     window.localStorage.removeItem(auditTrailStorageKey);
   }, [auditTrail]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(auditVisibilityStorageKey, JSON.stringify(isAuditVisible));
+  }, [isAuditVisible]);
 
   const updateMedication = (index: number, field: keyof MedicationRow, value: string) => {
     setMedications((current) =>
