@@ -43,6 +43,129 @@ select {
   padding: 48px 24px 56px;
 }
 
+.api-key-shell {
+  max-width: 1040px;
+}
+
+.api-key-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.api-key-form-card,
+.api-key-summary-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.api-key-form-card {
+  padding: 34px;
+}
+
+.api-key-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.api-key-heading {
+  min-width: 0;
+}
+
+.api-key-heading h1 {
+  margin: 4px 0 0;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+.api-key-form {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.api-key-form label {
+  display: grid;
+  gap: 10px;
+}
+
+.api-key-form label > span {
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.api-key-form input,
+.api-key-form textarea {
+  width: 100%;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 16px;
+  padding: 14px 16px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.97);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.api-key-form input::placeholder,
+.api-key-form textarea::placeholder {
+  color: #9ca3af;
+}
+
+.api-key-form input:focus,
+.api-key-form textarea:focus {
+  border-color: rgba(31, 107, 95, 0.42);
+  box-shadow: 0 0 0 4px rgba(31, 107, 95, 0.1);
+}
+
+.api-key-form small {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: -2px;
+}
+
+.api-key-notes textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.api-key-submit {
+  justify-self: start;
+  margin-top: 2px;
+}
+
+.api-key-summary-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.summary-panel {
+  border-radius: 22px;
+  padding: 18px 18px 20px;
+  background: linear-gradient(180deg, rgba(247, 249, 247, 0.95), rgba(238, 244, 242, 0.92));
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.summary-panel h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.summary-panel p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .workspace-grid {
   display: grid;
   gap: 18px;
@@ -698,6 +821,14 @@ select {
 }
 
 @media (max-width: 900px) {
+  .api-key-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .api-key-summary-card {
+    order: -1;
+  }
+
   .feature-grid {
     grid-template-columns: 1fr;
   }
@@ -726,6 +857,29 @@ select {
     flex-direction: column;
   }
 
+
+@media (max-width: 640px) {
+  .api-key-heading-row {
+    flex-direction: column;
+  }
+
+  .api-key-heading-row .secondary-button {
+    align-self: flex-start;
+  }
+
+  .api-key-form-card,
+  .api-key-summary-card {
+    border-radius: 22px;
+  }
+
+  .api-key-form-card {
+    padding: 22px;
+  }
+
+  .page-shell {
+    padding: 24px 16px 40px;
+  }
+}
   .signoff-actions .primary-button,
   .signoff-actions .secondary-button {
     width: 100%;

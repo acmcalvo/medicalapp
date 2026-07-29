@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Medical Interaction Assistant',
-  description: 'Role-based workflow for medication interaction checking and clinician review',
+  title: 'Create API Key',
+  description: 'Create a restricted API key for MedicalAPP integration access',
 };
 
 export default function RootLayout({
