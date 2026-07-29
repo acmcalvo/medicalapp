@@ -2,6 +2,25 @@
 
 FastAPI service for the medical interaction assistant.
 
+## External interactions configuration
+
+The interaction checker route (`POST /api/interactions/check`) uses a dedicated external provider configuration:
+
+- `INTERACTIONS_API_URL` - full URL for the external interactions endpoint
+- `INTERACTIONS_API_KEY` - optional API key or token
+- `INTERACTIONS_API_AUTH_HEADER` - header name for the key, defaults to `Authorization`
+- `INTERACTIONS_API_AUTH_PREFIX` - prefix used only when header is `Authorization`, defaults to `Bearer`
+- `INTERACTIONS_API_TIMEOUT_SEC` - request timeout in seconds, defaults to `10`
+
+Example:
+
+```bash
+INTERACTIONS_API_URL=https://api.example.com/interactions/check
+INTERACTIONS_API_KEY=your_token_here
+INTERACTIONS_API_AUTH_HEADER=Authorization
+INTERACTIONS_API_AUTH_PREFIX=Bearer
+```
+
 ## RxLabelGuard configuration
 
 Set these environment variables when you want the backend to query RxLabelGuard:
