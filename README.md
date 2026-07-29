@@ -83,3 +83,20 @@ Each rule must include:
 - `monitoring` (array of strings)
 
 This allows fast bulk updates by replacing or extending the JSON file.
+
+## Condition + Medication Risk Rules
+
+You can also maintain condition-aware risk checks (for example `diabetes + prednisone`, `lung cancer + bleomycin`) through a JSON file.
+
+- Default file: `backend/app/data/condition_medication_rules.json`
+- Optional override: `CONDITION_MEDICATION_RULES_FILE=/absolute/path/to/condition_medication_rules.json`
+
+Each rule must include:
+
+- `condition`, `medication`
+- `condition_keywords`, `medication_keywords` (arrays of match keywords)
+- `severity` (`contraindicated|major|moderate|minor|none`)
+- `mechanism`, `clinical_effect`, `recommendation`
+- `monitoring` (array of strings)
+
+In the UI, enter conditions in the new `Conditions / diagnoses` field as a comma-separated list (example: `diabetes, lung cancer`).

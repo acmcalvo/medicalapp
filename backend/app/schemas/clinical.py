@@ -19,6 +19,7 @@ class PatientContext(BaseModel):
     egfr: float | None = Field(default=None, description="Kidney function estimate")
     liver_impairment: Literal["none", "mild", "moderate", "severe", "unknown"] = "unknown"
     allergies: list[str] = Field(default_factory=list)
+    conditions: list[str] = Field(default_factory=list)
 
 
 class InteractionItem(BaseModel):

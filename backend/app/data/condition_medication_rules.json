@@ -1,0 +1,35 @@
+[
+  {
+    "condition": "Diabetes",
+    "medication": "Prednisone",
+    "condition_keywords": ["diabetes", "diabetic", "diebetic", "type 1 diabetes", "type 2 diabetes"],
+    "medication_keywords": ["prednisone", "dexamethasone", "methylprednisolone", "steroid", "corticosteroid"],
+    "severity": "major",
+    "mechanism": "Systemic corticosteroids can raise blood glucose and worsen glycemic control.",
+    "clinical_effect": "Risk of hyperglycemia and increased need for diabetes therapy adjustments.",
+    "recommendation": "Use the lowest effective steroid dose and coordinate glucose management during treatment.",
+    "monitoring": ["Monitor blood glucose frequently", "Review diabetes medication plan", "Watch for hyperglycemia symptoms"]
+  },
+  {
+    "condition": "Diabetes",
+    "medication": "Levofloxacin",
+    "condition_keywords": ["diabetes", "diabetic", "diebetic", "type 1 diabetes", "type 2 diabetes"],
+    "medication_keywords": ["levofloxacin", "ciprofloxacin", "moxifloxacin", "fluoroquinolone"],
+    "severity": "moderate",
+    "mechanism": "Fluoroquinolones may alter glucose regulation, causing hypo- or hyperglycemia.",
+    "clinical_effect": "Risk of unstable glucose control in diabetes patients.",
+    "recommendation": "Use caution and reinforce glucose self-monitoring while on therapy.",
+    "monitoring": ["Monitor blood glucose", "Assess for dizziness/sweating/confusion", "Adjust antidiabetic therapy if needed"]
+  },
+  {
+    "condition": "Lung cancer",
+    "medication": "Bleomycin",
+    "condition_keywords": ["lung cancer", "pulmonary cancer", "carcer lung", "lung carcer"],
+    "medication_keywords": ["bleomycin"],
+    "severity": "major",
+    "mechanism": "Bleomycin is associated with pulmonary toxicity, which may compound baseline respiratory vulnerability.",
+    "clinical_effect": "Higher risk of pulmonary adverse effects and respiratory decline.",
+    "recommendation": "Ensure oncology-supervised use with baseline and follow-up pulmonary assessment.",
+    "monitoring": ["Monitor oxygen saturation", "Monitor for cough/dyspnea", "Review pulmonary imaging/function as indicated"]
+  }
+]

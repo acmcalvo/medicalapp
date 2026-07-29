@@ -80,6 +80,43 @@ DEFAULT_HEURISTIC_INTERACTION_RULES = [
 ]
 
 
+DEFAULT_CONDITION_MEDICATION_RULES = [
+    {
+        "condition": "Diabetes",
+        "medication": "Prednisone",
+        "condition_keywords": ["diabetes", "diabetic", "diebetic", "type 1 diabetes", "type 2 diabetes"],
+        "medication_keywords": ["prednisone", "dexamethasone", "methylprednisolone", "steroid", "corticosteroid"],
+        "severity": "major",
+        "mechanism": "Systemic corticosteroids can raise blood glucose and worsen glycemic control.",
+        "clinical_effect": "Risk of hyperglycemia and increased need for diabetes therapy adjustments.",
+        "recommendation": "Use the lowest effective steroid dose and coordinate glucose management during treatment.",
+        "monitoring": ["Monitor blood glucose frequently", "Review diabetes medication plan", "Watch for hyperglycemia symptoms"],
+    },
+    {
+        "condition": "Diabetes",
+        "medication": "Levofloxacin",
+        "condition_keywords": ["diabetes", "diabetic", "diebetic", "type 1 diabetes", "type 2 diabetes"],
+        "medication_keywords": ["levofloxacin", "ciprofloxacin", "moxifloxacin", "fluoroquinolone"],
+        "severity": "moderate",
+        "mechanism": "Fluoroquinolones may alter glucose regulation, causing hypo- or hyperglycemia.",
+        "clinical_effect": "Risk of unstable glucose control in diabetes patients.",
+        "recommendation": "Use caution and reinforce glucose self-monitoring while on therapy.",
+        "monitoring": ["Monitor blood glucose", "Assess for dizziness/sweating/confusion", "Adjust antidiabetic therapy if needed"],
+    },
+    {
+        "condition": "Lung cancer",
+        "medication": "Bleomycin",
+        "condition_keywords": ["lung cancer", "pulmonary cancer", "carcer lung", "lung carcer"],
+        "medication_keywords": ["bleomycin"],
+        "severity": "major",
+        "mechanism": "Bleomycin is associated with pulmonary toxicity, which may compound baseline respiratory vulnerability.",
+        "clinical_effect": "Higher risk of pulmonary adverse effects and respiratory decline.",
+        "recommendation": "Ensure oncology-supervised use with baseline and follow-up pulmonary assessment.",
+        "monitoring": ["Monitor oxygen saturation", "Monitor for cough/dyspnea", "Review pulmonary imaging/function as indicated"],
+    },
+]
+
+
 def _load_heuristic_rules() -> list[dict]:
     default_rules = DEFAULT_HEURISTIC_INTERACTION_RULES
     default_path = Path(__file__).resolve().parent.parent / "data" / "interaction_rules.json"
@@ -124,11 +161,75 @@ def _load_heuristic_rules() -> list[dict]:
     return normalized_rules or default_rules
 
 
+def _load_condition_medication_rules() -> list[dict]:
+    default_rules = DEFAULT_CONDITION_MEDICATION_RULES
+    default_path = Path(__file__).resolve().parent.parent / "data" / "condition_medication_rules.json"
+    configured_path = os.getenv("CONDITION_MEDICATION_RULES_FILE", "").strip()
+    rules_path = Path(configured_path) if configured_path else default_path
+
+    try:
+        payload = json.loads(rules_path.read_text(encoding="utf-8"))
+    except Exception:
+        return default_rules
+
+    if not isinstance(payload, list):
+        return default_rules
+
+    required_fields = {
+        "condition",
+        "medication",
+        "condition_keywords",
+        "medication_keywords",
+        "severity",
+        "mechanism",
+        "clinical_effect",
+        "recommendation",
+        "monitoring",
+    }
+    valid_severity = {"contraindicated", "major", "moderate", "minor", "none"}
+
+    normalized_rules: list[dict] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        if not required_fields.issubset(item.keys()):
+            continue
+        if item.get("severity") not in valid_severity:
+            continue
+        if not isinstance(item.get("condition_keywords"), list) or not isinstance(item.get("medication_keywords"), list):
+            continue
+        if not isinstance(item.get("monitoring"), list):
+            continue
+        normalized_rules.append(item)
+
+    return normalized_rules or default_rules
+
+
 HEURISTIC_INTERACTION_RULES = _load_heuristic_rules()
+CONDITION_MEDICATION_RULES = _load_condition_medication_rules()
 
 
 def _contains_keyword(names: set[str], keywords: list[str]) -> bool:
     return any(any(keyword in name for keyword in keywords) for name in names)
+
+
+def _dedupe_interactions(items: list[InteractionItem]) -> list[InteractionItem]:
+    deduped: list[InteractionItem] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    for item in items:
+        key = (
+            item.drug_a.lower(),
+            item.drug_b.lower(),
+            item.severity,
+            item.recommendation.lower(),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+
+    return deduped
 
 
 def _max_severity(interactions: list[InteractionItem]) -> str:
@@ -161,6 +262,32 @@ def _build_external_items(items: list[dict]) -> list[InteractionItem]:
     return interaction_items
 
 
+def _build_condition_items(normalized_medications: set[str], normalized_conditions: set[str]) -> list[InteractionItem]:
+    condition_items: list[InteractionItem] = []
+
+    for rule in CONDITION_MEDICATION_RULES:
+        condition_match = _contains_keyword(normalized_conditions, rule["condition_keywords"])
+        medication_match = _contains_keyword(normalized_medications, rule["medication_keywords"])
+        if not (condition_match and medication_match):
+            continue
+
+        condition_items.append(
+            InteractionItem(
+                drug_a=f"Condition: {rule['condition']}",
+                drug_b=rule["medication"],
+                severity=rule["severity"],
+                source_type="heuristic",
+                mechanism=rule["mechanism"],
+                clinical_effect=rule["clinical_effect"],
+                recommendation=rule["recommendation"],
+                monitoring=rule["monitoring"],
+                source=f"Fallback condition-medication rule | {get_label_snippet(rule['medication'])}",
+            )
+        )
+
+    return condition_items
+
+
 def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResponse:
     cleaned_names = [
         medication.name_entered.strip()
@@ -169,11 +296,18 @@ def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResp
     ]
 
     provider_mode = os.getenv("INTERACTION_PROVIDER", "auto").strip().lower()
+    normalized_names = {normalize_medication_name(medication) for medication in request.medications if medication.name_entered.strip()}
+    normalized_conditions = {
+        condition.strip().lower()
+        for condition in request.patient.conditions
+        if condition.strip()
+    }
+    condition_items = _build_condition_items(normalized_names, normalized_conditions)
 
     if provider_mode in {"external", "auto"} and is_external_provider_enabled():
         external_items = lookup_external_interactions(cleaned_names)
         if external_items:
-            interactions = _build_external_items(external_items)
+            interactions = _dedupe_interactions(_build_external_items(external_items) + condition_items)
             return InteractionCheckResponse(
                 max_severity=_max_severity(interactions),
                 interactions=interactions,
@@ -210,16 +344,17 @@ def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResp
                         )
                     )
 
+                merged_items = _dedupe_interactions(interaction_items + condition_items)
+
                 return InteractionCheckResponse(
-                    max_severity="major",
-                    interactions=interaction_items,
+                    max_severity=_max_severity(merged_items),
+                    interactions=merged_items,
                     requires_clinician_review=True,
                 )
         except Exception:
             pass
 
-    normalized_names = {normalize_medication_name(medication) for medication in request.medications if medication.name_entered.strip()}
-
+    heuristic_items: list[InteractionItem] = []
     for rule in HEURISTIC_INTERACTION_RULES:
         matches_direct = _contains_keyword(normalized_names, rule["keywords_a"]) and _contains_keyword(normalized_names, rule["keywords_b"])
         matches_reverse = _contains_keyword(normalized_names, rule["keywords_b"]) and _contains_keyword(normalized_names, rule["keywords_a"])
@@ -227,21 +362,25 @@ def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResp
             continue
 
         pair = summarize_drug_pair(rule["drug_a"], rule["drug_b"])
+        heuristic_items.append(
+            InteractionItem(
+                drug_a=pair["drug_a"],
+                drug_b=pair["drug_b"],
+                severity=rule["severity"],
+                source_type="heuristic",
+                mechanism=rule["mechanism"],
+                clinical_effect=rule["clinical_effect"],
+                recommendation=rule["recommendation"],
+                monitoring=rule["monitoring"],
+                source=f"Fallback heuristic | {pair['source']} | {get_label_snippet(rule['drug_a'])} | {get_safety_note(rule['drug_b'])}",
+            )
+        )
+
+    merged_fallback_items = _dedupe_interactions(heuristic_items + condition_items)
+    if merged_fallback_items:
         return InteractionCheckResponse(
-            max_severity=rule["severity"],
-            interactions=[
-                InteractionItem(
-                    drug_a=pair["drug_a"],
-                    drug_b=pair["drug_b"],
-                    severity=rule["severity"],
-                    source_type="heuristic",
-                    mechanism=rule["mechanism"],
-                    clinical_effect=rule["clinical_effect"],
-                    recommendation=rule["recommendation"],
-                    monitoring=rule["monitoring"],
-                    source=f"Fallback heuristic | {pair['source']} | {get_label_snippet(rule['drug_a'])} | {get_safety_note(rule['drug_b'])}",
-                )
-            ],
+            max_severity=_max_severity(merged_fallback_items),
+            interactions=merged_fallback_items,
             requires_clinician_review=True,
         )
 

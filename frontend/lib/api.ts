@@ -13,6 +13,8 @@ export type PatientContext = {
   pregnancy_status: 'pregnant' | 'not_pregnant' | 'unknown';
   egfr?: number;
   liver_impairment: 'none' | 'mild' | 'moderate' | 'severe' | 'unknown';
+  allergies?: string[];
+  conditions?: string[];
 };
 
 export type InteractionItem = {

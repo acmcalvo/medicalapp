@@ -23,6 +23,7 @@ type PatientDraft = {
   egfr: string;
   liver_impairment: 'none' | 'mild' | 'moderate' | 'severe' | 'unknown';
   allergies: string;
+  conditions: string;
 };
 
 const initialMedications: MedicationRow[] = [
@@ -104,6 +105,7 @@ export function InteractionWorkspace() {
     egfr: '',
     liver_impairment: 'unknown',
     allergies: '',
+    conditions: '',
   });
   const [interactionResult, setInteractionResult] = useState<InteractionCheckResponse | null>(null);
   const [adviceResult, setAdviceResult] = useState<AdviceResponse | null>(null);
@@ -274,6 +276,10 @@ export function InteractionWorkspace() {
             .split(',')
             .map((allergy) => allergy.trim())
             .filter((allergy) => allergy.length > 0),
+          conditions: patient.conditions
+            .split(',')
+            .map((condition) => condition.trim())
+            .filter((condition) => condition.length > 0),
         },
       };
 
@@ -287,7 +293,7 @@ export function InteractionWorkspace() {
       );
       appendAuditEntry(
         'Interaction check',
-        `Checked ${cleanedMedications.length} medication${cleanedMedications.length === 1 ? '' : 's'} with ${interactionPayload.patient.allergies.length} allergy entr${interactionPayload.patient.allergies.length === 1 ? 'y' : 'ies'}; evidence mode: ${evidenceModes.length ? evidenceModes.join(', ') : 'none'}.`,
+        `Checked ${cleanedMedications.length} medication${cleanedMedications.length === 1 ? '' : 's'} with ${interactionPayload.patient.allergies.length} allergy entr${interactionPayload.patient.allergies.length === 1 ? 'y' : 'ies'} and ${interactionPayload.patient.conditions.length} condition${interactionPayload.patient.conditions.length === 1 ? '' : 's'}; evidence mode: ${evidenceModes.length ? evidenceModes.join(', ') : 'none'}.`,
       );
 
       if (interactionResponse.interactions.length === 0) {
@@ -522,6 +528,16 @@ export function InteractionWorkspace() {
               placeholder="e.g. penicillin, shellfish"
               value={patient.allergies}
               onChange={(event) => updatePatient('allergies', event.target.value)}
+            />
+          </label>
+
+          <label className="patient-textarea">
+            <span>Conditions / diagnoses</span>
+            <textarea
+              rows={3}
+              placeholder="e.g. diabetes, lung cancer, COPD"
+              value={patient.conditions}
+              onChange={(event) => updatePatient('conditions', event.target.value)}
             />
           </label>
         </div>
