@@ -74,7 +74,8 @@ export type ReviewSignOffResponse = {
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${baseUrl}${path}`, {
+  const requestUrl = `${baseUrl}${path}`;
+  const response = await fetch(requestUrl, {
     headers: {
       'Content-Type': 'application/json',
       ...(init?.headers ?? {}),
@@ -83,7 +84,13 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    const bodyText = (await response.text()).trim();
+    const hint =
+      response.status === 404 && requestUrl.includes('/api/interactions/check')
+        ? ' Hint: backend exposes /interactions/check (without /api prefix).'
+        : '';
+    const detail = bodyText ? ` Response: ${bodyText}` : '';
+    throw new Error(`Request failed with status ${response.status} for ${requestUrl}.${detail}${hint}`);
   }
 
   return (await response.json()) as T;
