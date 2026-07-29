@@ -39,6 +39,7 @@ const evidenceBullets = [
 
 const supportedFallbackPairs = [
   'Warfarin + Ibuprofen (including Advil, Motrin)',
+  'Warfarin + Digoxin (including Lanoxin)',
   'Warfarin + Ginkgo Biloba',
   'Warfarin + Aspirin',
   'Warfarin + Alcohol',
@@ -615,6 +616,11 @@ export function InteractionWorkspace() {
                   >
                     {sourceTypeLabelMap[interaction.source_type]}
                   </div>
+                  {interaction.source_type === 'heuristic' ? (
+                    <div className="source-pill source-heuristic" style={{ marginTop: '0.35rem' }}>
+                      Fallback rule matched
+                    </div>
+                  ) : null}
                   <div className="table-secondary">{interaction.source}</div>
                 </div>
               </div>

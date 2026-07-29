@@ -44,6 +44,17 @@
     "monitoring": ["Monitor INR trend", "Assess for bleeding symptoms", "Counsel on alcohol intake consistency"]
   },
   {
+    "drug_a": "Warfarin",
+    "drug_b": "Digoxin",
+    "keywords_a": ["warfarin"],
+    "keywords_b": ["digoxin", "lanoxin"],
+    "severity": "moderate",
+    "mechanism": "Concomitant therapy can increase management complexity and may contribute to altered anticoagulation or toxicity risk in vulnerable patients.",
+    "clinical_effect": "Potential risk of unstable anticoagulation control or digoxin-related adverse effects in high-risk patients.",
+    "recommendation": "Use with clinical caution, review patient-specific risk factors, and confirm follow-up monitoring plan.",
+    "monitoring": ["Monitor INR trend", "Monitor heart rate", "Assess for digoxin toxicity symptoms"]
+  },
+  {
     "drug_a": "Simvastatin",
     "drug_b": "Clarithromycin",
     "keywords_a": ["simvastatin"],
