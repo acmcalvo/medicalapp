@@ -366,7 +366,7 @@ export function InteractionWorkspace() {
         <h1>Check medication interactions before generating guidance.</h1>
         <p className="hero-copy">
           This screen is designed for doctor and pharmacist review. It will later connect directly to RxNav, DailyMed,
-          and the advice API.
+          RxLabelGuard, and the advice API.
         </p>
 
         <div className="hero-actions">

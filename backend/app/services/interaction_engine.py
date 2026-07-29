@@ -7,6 +7,7 @@ from app.schemas.clinical import InteractionCheckRequest, InteractionCheckRespon
 from app.services.dailymed_client import get_label_snippet
 from app.services.external_interactions_client import is_external_provider_enabled, lookup_external_interactions
 from app.services.openfda_client import get_safety_note
+from app.services.rxlabelguard_client import get_label_guard_note
 from app.services.rxnav_client import get_rxnorm_name, lookup_interactions, lookup_rxcui, normalize_medication_name, summarize_drug_pair
 
 
@@ -340,7 +341,7 @@ def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResp
                             clinical_effect="Clinical significance determined by RxNav interaction data.",
                             recommendation="Review with clinician before dispensing or prescribing.",
                             monitoring=["Monitor closely", "Confirm therapeutic necessity"],
-                            source=f"Live RxNorm lookup ({', '.join(rxcuis)}) | {get_label_snippet(concept_a)} | {get_safety_note(concept_b)}",
+                            source=f"Live RxNorm lookup ({', '.join(rxcuis)}) | {get_label_snippet(concept_a)} | {get_label_guard_note(concept_a)} | {get_safety_note(concept_b)} | {get_label_guard_note(concept_b)}",
                         )
                     )
 
@@ -372,7 +373,7 @@ def check_interactions(request: InteractionCheckRequest) -> InteractionCheckResp
                 clinical_effect=rule["clinical_effect"],
                 recommendation=rule["recommendation"],
                 monitoring=rule["monitoring"],
-                source=f"Fallback heuristic | {pair['source']} | {get_label_snippet(rule['drug_a'])} | {get_safety_note(rule['drug_b'])}",
+                source=f"Fallback heuristic | {pair['source']} | {get_label_snippet(rule['drug_a'])} | {get_label_guard_note(rule['drug_a'])} | {get_safety_note(rule['drug_b'])} | {get_label_guard_note(rule['drug_b'])}",
             )
         )
 
