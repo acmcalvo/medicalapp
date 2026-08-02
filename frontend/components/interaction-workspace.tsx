@@ -97,6 +97,20 @@ type AuditEntry = {
   detail: string;
 };
 
+type FollowUpEntry = {
+  id: string;
+  question: string;
+  response: AdviceResponse;
+};
+
+const defaultAdviceQuestion = 'Summarize the medication review for clinician sign-off.';
+
+const followUpPromptSuggestions = [
+  'How do the current conditions change this interaction?',
+  'What should I monitor for in this patient?',
+  'Why is this considered high risk?',
+];
+
 export function InteractionWorkspace() {
   const [role, setRole] = useState<Role>('pharmacist');
   const [medications, setMedications] = useState<MedicationRow[]>(initialMedications);
@@ -113,8 +127,11 @@ export function InteractionWorkspace() {
   const [reviewResult, setReviewResult] = useState<ReviewSignOffResponse | null>(null);
   const [reviewNote, setReviewNote] = useState('');
   const [auditTrail, setAuditTrail] = useState<AuditEntry[]>([]);
+  const [followUpHistory, setFollowUpHistory] = useState<FollowUpEntry[]>([]);
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
   const [isAuditVisible, setIsAuditVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFollowUpLoading, setIsFollowUpLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const hasPotentialInteraction = useMemo(() => {
@@ -254,6 +271,21 @@ export function InteractionWorkspace() {
     setPatient((current) => ({ ...current, [field]: value }));
   };
 
+  const buildPatientPayload = () => ({
+    age: patient.age.trim() ? Number(patient.age) : undefined,
+    pregnancy_status: patient.pregnancy_status,
+    egfr: patient.egfr.trim() ? Number(patient.egfr) : undefined,
+    liver_impairment: patient.liver_impairment,
+    allergies: patient.allergies
+      .split(',')
+      .map((allergy) => allergy.trim())
+      .filter((allergy) => allergy.length > 0),
+    conditions: patient.conditions
+      .split(',')
+      .map((condition) => condition.trim())
+      .filter((condition) => condition.length > 0),
+  });
+
   const runInteractionCheck = async () => {
     setIsLoading(true);
     setErrorMessage(null);
@@ -268,25 +300,14 @@ export function InteractionWorkspace() {
 
       const interactionPayload = {
         medications: cleanedMedications,
-        patient: {
-          age: patient.age.trim() ? Number(patient.age) : undefined,
-          pregnancy_status: patient.pregnancy_status,
-          egfr: patient.egfr.trim() ? Number(patient.egfr) : undefined,
-          liver_impairment: patient.liver_impairment,
-          allergies: patient.allergies
-            .split(',')
-            .map((allergy) => allergy.trim())
-            .filter((allergy) => allergy.length > 0),
-          conditions: patient.conditions
-            .split(',')
-            .map((condition) => condition.trim())
-            .filter((condition) => condition.length > 0),
-        },
+        patient: buildPatientPayload(),
       };
 
       const interactionResponse = await checkInteractions(interactionPayload);
       setInteractionResult(interactionResponse);
       setReviewResult(null);
+      setFollowUpHistory([]);
+      setFollowUpQuestion('');
       const evidenceModes = Array.from(
         new Set(
           interactionResponse.interactions.map((interaction) => sourceTypeLabelMap[interaction.source_type]),
@@ -307,7 +328,7 @@ export function InteractionWorkspace() {
         role,
         interactions: interactionResponse.interactions,
         patient: interactionPayload.patient,
-        question: 'Summarize the medication review for clinician sign-off.',
+        question: defaultAdviceQuestion,
       });
       setAdviceResult(adviceResponse);
       appendAuditEntry('Advice generated', `Generated guidance for role: ${role}.`);
@@ -321,6 +342,47 @@ export function InteractionWorkspace() {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to run the interaction check.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const runFollowUpQuestion = async (questionOverride?: string) => {
+    if (!interactionResult?.interactions.length) {
+      setErrorMessage('Run an interaction check before asking a follow-up question.');
+      return;
+    }
+
+    const question = (questionOverride ?? followUpQuestion).trim();
+    if (!question) {
+      setErrorMessage('Enter a follow-up question before sending it.');
+      return;
+    }
+
+    setIsFollowUpLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await generateAdvice({
+        role,
+        interactions: interactionResult.interactions,
+        patient: buildPatientPayload(),
+        question,
+      });
+
+      setFollowUpHistory((current) => [
+        {
+          id: `${Date.now()}-${current.length}`,
+          question,
+          response,
+        },
+        ...current,
+      ]);
+      setFollowUpQuestion('');
+      appendAuditEntry('Follow-up question', `Asked: ${question}`);
+    } catch (error) {
+      appendAuditEntry('Follow-up failed', error instanceof Error ? error.message : 'Unknown error');
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to generate the follow-up answer.');
+    } finally {
+      setIsFollowUpLoading(false);
     }
   };
 
@@ -702,6 +764,108 @@ export function InteractionWorkspace() {
           ) : (
             <p className="advice-placeholder">
               Run the interaction check to generate a clinician-ready summary and sign-off guidance.
+            </p>
+          )}
+        </div>
+
+        <div className="followup-panel">
+          <div className="advice-header">
+            <p className="panel-label">Follow-up Q&A</p>
+            <h3>{interactionResult?.interactions.length ? 'Ask about conditions or monitoring' : 'Awaiting interaction results'}</h3>
+          </div>
+
+          {interactionResult?.interactions.length ? (
+            <>
+              <p className="advice-summary">
+                Questions stay constrained to the current interaction findings, patient conditions, and cited evidence.
+              </p>
+
+              <div className="followup-suggestions" aria-label="Suggested follow-up questions">
+                {followUpPromptSuggestions.map((prompt) => (
+                  <button
+                    key={prompt}
+                    className="secondary-button compact"
+                    type="button"
+                    onClick={() => runFollowUpQuestion(prompt)}
+                    disabled={isFollowUpLoading || isLoading}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+
+              <label className="followup-composer">
+                <span>Follow-up question</span>
+                <textarea
+                  rows={3}
+                  placeholder="Ask about condition impact, monitoring, or why the interaction was flagged"
+                  value={followUpQuestion}
+                  onChange={(event) => setFollowUpQuestion(event.target.value)}
+                />
+              </label>
+
+              <div className="signoff-actions">
+                <button
+                  className="primary-button"
+                  type="button"
+                  onClick={() => runFollowUpQuestion()}
+                  disabled={isFollowUpLoading || isLoading}
+                >
+                  {isFollowUpLoading ? 'Answering...' : 'Ask follow-up'}
+                </button>
+              </div>
+
+              {followUpHistory.length ? (
+                <div className="followup-history">
+                  {followUpHistory.map((entry) => (
+                    <article key={entry.id} className="followup-entry">
+                      <div className="followup-role-label">Clinician question</div>
+                      <p className="followup-question">{entry.question}</p>
+                      <div className="followup-role-label">Assistant answer</div>
+                      <p className="advice-summary">{entry.response.summary}</p>
+                      <ul>
+                        {entry.response.action_plan.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                      {entry.response.red_flags.length ? (
+                        <div className="advice-subpanel">
+                          <h4>Red flags</h4>
+                          <ul>
+                            {entry.response.red_flags.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                      {entry.response.alternatives.length ? (
+                        <div className="advice-subpanel">
+                          <h4>Alternatives</h4>
+                          <ul>
+                            {entry.response.alternatives.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                      <div className="advice-citations">
+                        <strong>Citations</strong>
+                        <span>{entry.response.citations.join(', ')}</span>
+                      </div>
+                      <p className="followup-disclaimer">{entry.response.disclaimer}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="table-empty-state">
+                  <strong>No follow-up questions yet</strong>
+                  <p>Ask about condition impact, monitoring, or why this case was flagged.</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="advice-placeholder">
+              Run the interaction check first so follow-up answers can stay grounded in the current medication review.
             </p>
           )}
         </div>
