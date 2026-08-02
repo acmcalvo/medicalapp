@@ -527,7 +527,7 @@ export function InteractionWorkspace() {
         {errorMessage ? <div className="inline-error">{errorMessage}</div> : null}
       </section>
 
-      <section className="workspace-panel" aria-label="Medication entry form">
+      <section className="workspace-panel input-panel" aria-label="Medication entry form">
         <div className="panel-header">
           <div>
             <p className="panel-label">Medication list</p>
@@ -574,11 +574,6 @@ export function InteractionWorkspace() {
           ))}
         </div>
 
-        <div className="note-card">
-          <strong>Next step</strong>
-          <p>Send this structured payload to the backend before any AI-generated advice is shown.</p>
-        </div>
-
         <div className="note-card supported-pairs-card">
           <strong>Supported high-risk fallback pairs</strong>
           <p>These combinations are currently covered by explicit fallback rules if live interaction data is unavailable.</p>
@@ -590,7 +585,7 @@ export function InteractionWorkspace() {
         </div>
       </section>
 
-      <section className="workspace-panel" aria-label="Patient context form">
+      <section className="workspace-panel input-panel" aria-label="Patient context form">
         <div className="panel-header">
           <div>
             <p className="panel-label">Patient context</p>

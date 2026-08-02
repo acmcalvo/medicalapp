@@ -45,7 +45,28 @@ select {
 
 .workspace-grid {
   display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto;
   gap: 18px;
+}
+
+/* hero spans both columns */
+.case-hero {
+  grid-column: 1 / -1;
+}
+
+/* input panels: left column */
+.input-panel {
+  grid-column: 1;
+}
+
+/* results panel: right column, spans medication + patient input rows */
+.results-panel {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  display: grid;
+  gap: 16px;
+  align-content: start;
 }
 
 .hero {
@@ -85,26 +106,26 @@ select {
 }
 
 .hero h1 {
-  max-width: 12ch;
+  max-width: 20ch;
   margin: 0;
-  font-size: clamp(2.8rem, 7vw, 5.2rem);
-  line-height: 0.94;
-  letter-spacing: -0.04em;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .hero-copy {
-  max-width: 58ch;
-  margin: 18px 0 0;
+  max-width: 72ch;
+  margin: 10px 0 0;
   color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 18px;
 }
 
 .primary-button,
@@ -315,11 +336,6 @@ select {
   padding-left: 20px;
   color: var(--muted);
   line-height: 1.6;
-}
-
-.results-panel {
-  display: grid;
-  gap: 16px;
 }
 
 .alert-box {
@@ -549,7 +565,12 @@ select {
 .followup-suggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+}
+
+.followup-suggestions .secondary-button {
+  font-size: 0.85rem;
+  padding: 8px 14px;
 }
 
 .followup-composer {
@@ -772,6 +793,19 @@ select {
 }
 
 @media (max-width: 900px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .results-panel {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .input-panel {
+    grid-column: auto;
+  }
+
   .feature-grid {
     grid-template-columns: 1fr;
   }
