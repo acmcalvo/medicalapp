@@ -89,6 +89,9 @@ function hasKeywordMatch(names: string[], keywords: string[]) {
 const reviewStorageKey = 'medical-app-review-result';
 const auditTrailStorageKey = 'medical-app-audit-trail';
 const auditVisibilityStorageKey = 'medical-app-audit-visibility';
+const interactionStorageKey = 'medical-app-interaction-result';
+const adviceStorageKey = 'medical-app-advice-result';
+const followUpStorageKey = 'medical-app-followup-history';
 
 type AuditEntry = {
   id: string;
@@ -152,6 +155,33 @@ export function InteractionWorkspace() {
       return;
     }
 
+    const storedInteraction = window.localStorage.getItem(interactionStorageKey);
+    if (storedInteraction) {
+      try {
+        setInteractionResult(JSON.parse(storedInteraction) as InteractionCheckResponse);
+      } catch {
+        window.localStorage.removeItem(interactionStorageKey);
+      }
+    }
+
+    const storedAdvice = window.localStorage.getItem(adviceStorageKey);
+    if (storedAdvice) {
+      try {
+        setAdviceResult(JSON.parse(storedAdvice) as AdviceResponse);
+      } catch {
+        window.localStorage.removeItem(adviceStorageKey);
+      }
+    }
+
+    const storedFollowUp = window.localStorage.getItem(followUpStorageKey);
+    if (storedFollowUp) {
+      try {
+        setFollowUpHistory(JSON.parse(storedFollowUp) as FollowUpEntry[]);
+      } catch {
+        window.localStorage.removeItem(followUpStorageKey);
+      }
+    }
+
     const storedReview = window.localStorage.getItem(reviewStorageKey);
     if (!storedReview) {
       return;
@@ -197,6 +227,39 @@ export function InteractionWorkspace() {
       window.localStorage.removeItem(auditTrailStorageKey);
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (interactionResult) {
+      window.localStorage.setItem(interactionStorageKey, JSON.stringify(interactionResult));
+    } else {
+      window.localStorage.removeItem(interactionStorageKey);
+    }
+  }, [interactionResult]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (adviceResult) {
+      window.localStorage.setItem(adviceStorageKey, JSON.stringify(adviceResult));
+    } else {
+      window.localStorage.removeItem(adviceStorageKey);
+    }
+  }, [adviceResult]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    if (followUpHistory.length > 0) {
+      window.localStorage.setItem(followUpStorageKey, JSON.stringify(followUpHistory));
+    } else {
+      window.localStorage.removeItem(followUpStorageKey);
+    }
+  }, [followUpHistory]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -308,6 +371,7 @@ export function InteractionWorkspace() {
       setReviewResult(null);
       setFollowUpHistory([]);
       setFollowUpQuestion('');
+      window.localStorage.removeItem(followUpStorageKey);
       const evidenceModes = Array.from(
         new Set(
           interactionResponse.interactions.map((interaction) => sourceTypeLabelMap[interaction.source_type]),
